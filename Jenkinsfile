@@ -16,20 +16,24 @@ pipeline {
 
         stage('Initialize') {
             steps {
-                sh "$HOME/bin/terraform init"
+                dir("${env.WORKSPACE}/tests") {
+                    sh "$HOME/bin/terraform init"
+                }
             }
         }
 
         stage('Validate') {
             steps {
-                sh "$HOME/bin/terraform validate"
+                dir("${env.WORKSPACE}/tests") {
+                    sh "$HOME/bin/terraform validate"
+                }
             }
         }
 
-        stage('Plan') {
-            steps {
-                sh "$HOME/bin/terraform plan"
-            }
-        }
+        // stage('Plan') {
+        //     steps {
+        //         sh "$HOME/bin/terraform plan"
+        //     }
+        // }
     }
 }
