@@ -30,10 +30,12 @@ pipeline {
             }
         }
 
-        // stage('Plan') {
-        //     steps {
-        //         sh "$HOME/bin/terraform plan"
-        //     }
-        // }
+        stage('Plan') {
+            steps {
+                dir("${env.WORKSPACE}/tests") {
+                    sh "$HOME/bin/terraform plan"
+                }
+            }
+        }
     }
 }
