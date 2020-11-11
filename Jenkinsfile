@@ -1,6 +1,6 @@
 // Jenkinsfile
 
-String awsCredentials = 'ci-user'
+String awsCredentials = 'ci-user' // ID of AWS credentials in Jenkins
 
 pipeline {
     agent any
@@ -36,7 +36,7 @@ pipeline {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'awsCredentials',
+                    credentialsId: awsCredentials,
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
