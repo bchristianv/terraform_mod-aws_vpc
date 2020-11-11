@@ -1,5 +1,7 @@
 // Jenkinsfile
 
+String awsCredentials = 'ci-user'
+
 pipeline {
     agent any
 
@@ -32,8 +34,15 @@ pipeline {
 
         stage('Plan') {
             steps {
-                dir("${env.WORKSPACE}/tests") {
-                    sh "$HOME/bin/terraform plan"
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'awsCredentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    dir("${env.WORKSPACE}/tests") {
+                        sh "$HOME/bin/terraform plan"
+                    }
                 }
             }
         }
