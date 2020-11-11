@@ -23,6 +23,6 @@ module "vpc" {
 
   internal_dns_domainname = "test.int"
 
-  cidr = "10.0.0.0/8"
+  cidr = "10.0.0.0/16"
   name = "Test"
 }
