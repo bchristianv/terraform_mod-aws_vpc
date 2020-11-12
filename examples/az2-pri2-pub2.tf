@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source  = "github.com/bchristianv/terraform_mod-aws_vpc?ref=1.0.2"
+  source  = "github.com/bchristianv/terraform_mod-aws_vpc?ref=1.0.3"
 
   aws_region = "us-west-2"
 
