@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source  = "../"
+  source = "../"
 
   aws_region = "us-west-2"
 

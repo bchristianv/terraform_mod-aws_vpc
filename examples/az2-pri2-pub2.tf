@@ -14,31 +14,21 @@ provider "aws" {
 }
 
 module "vpc" {
-  source  = "github.com/bchristianv/terraform_mod-aws_vpc?ref=1.0.3"
+  source = "github.com/bchristianv/terraform_mod-aws_vpc?ref=1.0.3"
 
   aws_region = "us-west-2"
 
   az_private_subnets = { a = { sbits = 8, net = 1 }, b = { sbits = 8, net = 3 } }
   az_public_subnets  = { a = { sbits = 8, net = 2 }, b = { sbits = 8, net = 4 } }
+  cidr               = "10.0.0.0/16"
+
+  default_security_group_egress = [
+    { from_port = 0, to_port = 0, protocol = -1, cidr_blocks = "0.0.0.0/0" }
+  ]
+  default_security_group_ingress = [
+    { from_port = 0, to_port = 0, protocol = -1, self = true }
+  ]
 
   internal_dns_domainname = "example.int"
-
-  cidr = "10.0.0.0/16"
-  name = "Example"
-}
-
-resource "aws_default_security_group" "default" {
-  vpc_id = module.vpc.id
-  ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = -1
-    self      = true
-  }
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  name                    = "Example"
 }

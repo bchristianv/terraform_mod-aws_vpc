@@ -27,6 +27,18 @@ variable "cidr" {
   }
 }
 
+variable "default_security_group_egress" {
+  type        = list(map(string))
+  description = "List of egress rule mappings for the VPC default security group"
+  default     = [{ from_port = 0, to_port = 0, protocol = -1, cidr_blocks = "0.0.0.0/0" }]
+}
+
+variable "default_security_group_ingress" {
+  type        = list(map(string))
+  description = "List of ingress rule mappings for the VPC default security group"
+  default     = [{ from_port = 0, to_port = 0, protocol = -1, self = true }]
+}
+
 variable "internal_dns_domainname" {
   type        = string
   description = "The domain name for the Route53 internal hosted zone"

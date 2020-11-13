@@ -125,19 +125,37 @@ resource "aws_vpc_dhcp_options_association" "vpc_dhcp_options_assoc" {
   dhcp_options_id = aws_vpc_dhcp_options.vpc_dhcp_options.id
 }
 
-# TODO: Populate egress/ingress rules via variable(s), with default as described
-# resource "aws_default_security_group" "default" {
-#   vpc_id = aws_vpc.vpc.id
-#   ingress {
-#     from_port = 0
-#     to_port   = 0
-#     protocol  = -1
-#     self      = true
-#   }
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = -1
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
+resource "aws_default_security_group" "default" {
+  vpc_id = aws_vpc.vpc.id
+  dynamic "ingress" {
+    for_each = var.default_security_group_ingress
+    content {
+      self             = lookup(ingress.value, "self", null)
+      cidr_blocks      = compact(split(",", lookup(ingress.value, "cidr_blocks", "")))
+      ipv6_cidr_blocks = compact(split(",", lookup(ingress.value, "ipv6_cidr_blocks", "")))
+      prefix_list_ids  = compact(split(",", lookup(ingress.value, "prefix_list_ids", "")))
+      security_groups  = compact(split(",", lookup(ingress.value, "security_groups", "")))
+      description      = lookup(ingress.value, "description", null)
+      from_port        = lookup(ingress.value, "from_port", 0)
+      to_port          = lookup(ingress.value, "to_port", 0)
+      protocol         = lookup(ingress.value, "protocol", "-1")
+    }
+  }
+  dynamic "egress" {
+    for_each = var.default_security_group_egress
+    content {
+      self             = lookup(egress.value, "self", null)
+      cidr_blocks      = compact(split(",", lookup(egress.value, "cidr_blocks", "")))
+      ipv6_cidr_blocks = compact(split(",", lookup(egress.value, "ipv6_cidr_blocks", "")))
+      prefix_list_ids  = compact(split(",", lookup(egress.value, "prefix_list_ids", "")))
+      security_groups  = compact(split(",", lookup(egress.value, "security_groups", "")))
+      description      = lookup(egress.value, "description", null)
+      from_port        = lookup(egress.value, "from_port", 0)
+      to_port          = lookup(egress.value, "to_port", 0)
+      protocol         = lookup(egress.value, "protocol", "-1")
+    }
+  }
+  # tags = merge(
+  #   var.tags
+  # )
+}
