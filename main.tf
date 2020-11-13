@@ -3,9 +3,12 @@
 resource "aws_vpc" "vpc" {
   cidr_block           = var.cidr
   enable_dns_hostnames = true
-  tags = {
-    "Name" = "VPC - ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "VPC - ${var.name}"
+    }
+  )
 }
 
 resource "aws_subnet" "public_subnets" {
@@ -14,25 +17,34 @@ resource "aws_subnet" "public_subnets" {
   availability_zone       = "${var.aws_region}${each.key}"
   vpc_id                  = aws_vpc.vpc.id
   map_public_ip_on_launch = true
-  tags = {
-    "Name" = "Public Subnet ${var.aws_region}${each.key} - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "Public Subnet ${var.aws_region}${each.key} - VPC ${var.name}"
+    }
+  )
 }
 
 resource "aws_internet_gateway" "igw" {
   count  = length(var.az_public_subnets) > 0 ? 1 : 0
   vpc_id = aws_vpc.vpc.id
-  tags = {
-    "Name" = "IGW - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "IGW - VPC ${var.name}"
+    }
+  )
 }
 
 resource "aws_route_table" "public_rt" {
   count  = length(var.az_public_subnets) > 0 ? 1 : 0
   vpc_id = aws_vpc.vpc.id
-  tags = {
-    "Name" = "Public subnet routes - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "Public subnet routes - VPC ${var.name}"
+    }
+  )
 }
 
 resource "aws_route_table_association" "public_rt_assocs" {
@@ -55,14 +67,18 @@ resource "aws_subnet" "private_subnets" {
   availability_zone       = "${var.aws_region}${each.key}"
   vpc_id                  = aws_vpc.vpc.id
   map_public_ip_on_launch = true
-  tags = {
-    "Name" = "Private Subnet ${var.aws_region}${each.key} - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "Private Subnet ${var.aws_region}${each.key} - VPC ${var.name}"
+    }
+  )
 }
 
 resource "aws_eip" "nat_gw_eips" {
   count      = length(var.az_public_subnets) > 0 ? length(var.az_private_subnets) : 0
   vpc        = true
+  tags       = var.tags
   depends_on = [aws_internet_gateway.igw]
 }
 
@@ -70,18 +86,24 @@ resource "aws_nat_gateway" "nat_gws" {
   count         = length(var.az_public_subnets) > 0 ? length(var.az_private_subnets) : 0
   subnet_id     = values(aws_subnet.public_subnets)[count.index].id
   allocation_id = aws_eip.nat_gw_eips[count.index].id
-  tags = {
-    "Name" = "${values(aws_subnet.public_subnets)[count.index].availability_zone}: ${aws_eip.nat_gw_eips[count.index].public_ip} - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "${values(aws_subnet.public_subnets)[count.index].availability_zone}: ${aws_eip.nat_gw_eips[count.index].public_ip} - VPC ${var.name}"
+    }
+  )
   depends_on = [aws_internet_gateway.igw]
 }
 
 resource "aws_route_table" "private_rt" {
   for_each = zipmap(values(aws_subnet.private_subnets)[*].cidr_block, values(aws_subnet.private_subnets)[*].availability_zone)
   vpc_id   = aws_vpc.vpc.id
-  tags = {
-    "Name" = "Private subnet routes ${each.key} ${each.value} - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "Private subnet routes ${each.key} ${each.value} - VPC ${var.name}"
+    }
+  )
 }
 
 resource "aws_route_table_association" "private_rt_assocs" {
@@ -107,17 +129,18 @@ resource "aws_route53_zone" "internal_dns_zone" {
     vpc_region = var.aws_region
   }
   comment = "Internal DNS Zone - VPC ${var.name}"
-  # tags = {
-  #   "Name" = ""
-  # }
+  tags    = var.tags
 }
 
 resource "aws_vpc_dhcp_options" "vpc_dhcp_options" {
   domain_name         = var.internal_dns_domainname
   domain_name_servers = ["AmazonProvidedDNS"]
-  tags = {
-    "Name" = "DHCP Options set - VPC ${var.name}"
-  }
+  tags = merge(
+    var.tags,
+    {
+      "Name" = "DHCP Options set - VPC ${var.name}"
+    }
+  )
 }
 
 resource "aws_vpc_dhcp_options_association" "vpc_dhcp_options_assoc" {
@@ -155,7 +178,5 @@ resource "aws_default_security_group" "default" {
       protocol         = lookup(egress.value, "protocol", "-1")
     }
   }
-  # tags = merge(
-  #   var.tags
-  # )
+  tags = var.tags
 }
