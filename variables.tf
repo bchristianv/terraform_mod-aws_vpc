@@ -48,3 +48,9 @@ variable "name" {
   type        = string
   description = "The value to use for the VPC `Name` tag"
 }
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags to add to all resources that support them - 'Name' may be excluded"
+  default     = {}
+}
