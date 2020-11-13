@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "github.com/bchristianv/terraform_mod-aws_vpc?ref=1.1.0"
+  source = "github.com/bchristianv/terraform_mod-aws_vpc?ref=1.1.1"
 
   aws_region = "us-west-2"
 
@@ -31,4 +31,7 @@ module "vpc" {
 
   internal_dns_domainname = "example.int"
   name                    = "Example"
+  tags = {
+    "Environment" = "development"
+  }
 }
