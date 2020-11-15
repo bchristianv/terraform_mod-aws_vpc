@@ -66,7 +66,7 @@ resource "aws_subnet" "private_subnets" {
   cidr_block              = cidrsubnet(aws_vpc.vpc.cidr_block, each.value.sbits, each.value.net)
   availability_zone       = "${var.aws_region}${each.key}"
   vpc_id                  = aws_vpc.vpc.id
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   tags = merge(
     var.tags,
     {
